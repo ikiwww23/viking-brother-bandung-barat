@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keanggotaan - Viking Brother</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --biru-persib: #0a3d8b; --biru-gelap: #051e47; --biru-muda: #1e62c9;
+            --putih: #ffffff; --kuning: #ffeb3b;
+            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, var(--biru-persib), var(--biru-gelap)); color: var(--putih); margin: 0; padding-top: 20px; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; flex: 1; position: relative; z-index: 1; width: 100%; box-sizing: border-box;}
+
+        /* Sidebar Sama */
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1002; cursor: pointer; display: flex; flex-direction: column; gap: 6px; background: rgba(10, 61, 139, 0.7); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); backdrop-filter: blur(5px); transition: all 0.3s ease; }
+        .menu-toggle:hover { background: rgba(10, 61, 139, 0.9); }
+        .menu-toggle .bar { width: 30px; height: 3px; background-color: var(--putih); border-radius: 3px; transition: all 0.4s ease; }
+        .menu-toggle.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); background-color: var(--kuning); }
+        .menu-toggle.active .bar:nth-child(2) { opacity: 0; }
+        .menu-toggle.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); background-color: var(--kuning); }
+        nav { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: rgba(5, 30, 71, 0.95); backdrop-filter: blur(20px); z-index: 1001; border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; justify-content: flex-start; padding: 40px 20px; box-sizing: border-box; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.5); overflow-y: auto; }
+        nav.active { left: 0; }
+        nav a { color: var(--putih); text-decoration: none; font-size: 1.1em; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; transition: all 0.3s ease; display: block; text-align: center; }
+        nav a:hover, nav a.active { background: var(--kuning); color: var(--biru-persib); box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4); transform: translateX(10px); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        header { text-align: center; padding: 20px; position: relative; z-index: 1; margin-top: 20px; }
+        .logo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--glass-border); background: var(--glass-bg); padding: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); object-fit: cover; }
+        .section-title { text-align: center; margin: 20px 0 40px 0; font-size: 2.2em; text-transform: uppercase; font-weight: 700; color: var(--kuning); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        /* Form / Glass Card */
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: 600; font-size: 1em; color: #d1e0ff; }
+        
+        /* Modifikasi CSS agar Select dan File Input selaras */
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); 
+            border-radius: 12px; color: var(--putih); font-family: inherit; font-size: 1em; box-sizing: border-box; transition: all 0.3s ease; 
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
+            outline: none; border-color: var(--kuning); background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 10px rgba(255, 235, 59, 0.3); 
+        }
+        .form-group textarea { resize: vertical; height: 120px; }
+        
+        /* Styling Dropdown Select */
+        .form-group select option { background: var(--biru-gelap); color: var(--putih); }
+        
+        /* Styling File Upload Modern */
+        .form-group input[type="file"] { padding: 10px 15px; cursor: pointer; }
+        .form-group input[type="file"]::file-selector-button { 
+            background: var(--kuning); color: var(--biru-gelap); border: none; padding: 8px 15px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 15px; transition: background 0.3s; font-family: 'Poppins', sans-serif;
+        }
+        .form-group input[type="file"]::file-selector-button:hover { background: #e6d335; }
+
+        /* Info Box Transfer */
+        .info-box { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed var(--kuning); }
+        .info-box h4 { margin: 0 0 10px 0; color: var(--kuning); font-size: 1.1em; }
+        .info-box p { margin: 5px 0; font-size: 0.95em; color: #d1e0ff; }
+
+        .submit-btn { background: linear-gradient(45deg, var(--biru-muda), #2196f3); color: white; border: none; padding: 15px; font-size: 1.1em; width: 100%; border-radius: 30px; cursor: pointer; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4); transition: all 0.3s ease; }
+        .submit-btn:hover { background: linear-gradient(45deg, #2196f3, var(--biru-muda)); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6); }
+        .submit-btn.loading { opacity: 0.7; cursor: not-allowed; }
+
+        /* Modal Custom Alert */
+        .custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+        .custom-alert-overlay.show { opacity: 1; visibility: visible; }
+        .custom-alert-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px 20px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.8) translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 90%; width: 400px; }
+        .custom-alert-overlay.show .custom-alert-box { transform: scale(1) translateY(0); }
+        .custom-alert-icon { font-size: 4em; margin-bottom: 10px; display: block; }
+        .custom-alert-box h3 { color: var(--kuning); font-size: 1.8em; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;}
+        .custom-alert-box p { color: var(--putih); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5; }
+        .custom-alert-btn { background: linear-gradient(45deg, #25D366, #128C7E); color: white; border: none; padding: 12px 35px; font-size: 1.1em; border-radius: 30px; cursor: pointer; font-weight: 700; text-transform: uppercase; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; }
+        .custom-alert-btn:hover { background: linear-gradient(45deg, #128C7E, #075E54); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5); }
+
+        footer { text-align: center; padding: 30px 20px; font-size: 0.9em; background: rgba(0,0,0,0.6); border-top: 1px solid var(--glass-border); margin-top: 40px; color: #aaa; position: relative; z-index: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="menu-toggle" id="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+    <div class="overlay" id="overlay"></div>
+
+    <nav id="sidebar">
+        <div style="text-align: center; margin-bottom: 30px; padding-top: 20px;">
+            <img src="viking-brother/190197.jpg" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--putih); object-fit: cover;">
+        </div>
+        <a href="index.html">Beranda</a>
+        <a href="merchandise.html">Shopping</a>
+        <a href="pengurus.html">Jajaran Pengurus</a>
+        <a href="keanggotaan.html" class="active">Keanggotaan</a>
+        <a href="index.html#about">About Us</a>
+    </nav>
+
+    <header>
+        <img src="viking-brother/190197.jpg" alt="Logo" class="logo">
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">Pendaftaran Membership</h2>
+        
+        <div class="glass-card">
+            <p style="text-align: center; color: #d1e0ff; margin-bottom: 30px; font-size: 1.1em;">Mari bergabung menjadi bagian dari keluarga besar Viking Brother Bandung Barat.</p>
+            
+            <form id="pendaftaranForm" action="https://formspree.io/f/xbdbgjee" method="POST" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" name="Nama_Lengkap" placeholder="Masukkan nama lengkap sesuai KTP" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>NIK (Nomor Induk Kependudukan)</label>
+                    <input type="number" name="NIK" placeholder="Masukkan 16 digit NIK" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tempat, Tanggal Lahir</label>
+                    <input type="text" name="Tempat_Tanggal_Lahir" placeholder="Cth: Bandung, 1 Jan 2000" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Jenis Kelamin</label>
+                    <select name="Jenis_Kelamin" required>
+                        <option value="" disabled selected>-- Pilih Jenis Kelamin --</option>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nomor WhatsApp</label>
+                    <input type="tel" name="Nomor_WhatsApp" placeholder="08xxxxxxxxxx" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Alamat Lengkap (Domisili)</label>
+                    <textarea name="Alamat_Lengkap" placeholder="Tulis alamat lengkap Anda..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Pas Foto (3x4)</label>
+                    <input type="file" name="Pas_Foto" accept="image/*" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Pilihan Paket Bundling Membership</label>
+                    <select name="Paket_Bundling" required>
+                        <option value="" disabled selected>-- Pilih Paket Registrasi --</option>
+                        <option value="Paket Basic (KTA Saja)">Paket Basic (KTA Saja) - Rp 50.000</option>
+                        <option value="Paket Standard (KTA + T-Shirt)">Paket Standard (KTA + T-Shirt) - Rp 150.000</option>
+                        <option value="Paket Premium (KTA + Hoodie)">Paket Premium (KTA + Hoodie) - Rp 300.000</option>
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    <h4>💳 Informasi Transfer Pembayaran</h4>
+                    <p>Silakan lakukan pembayaran sesuai dengan paket yang dipilih ke salah satu rekening berikut:</p>
+                    <p><strong>BCA:</strong> 1234 5678 90 a.n Viking Brother</p>
+                    <p><strong>DANA:</strong> 0812 3456 7890 a.n Viking Brother</p>
+                    <p style="font-size: 0.85em; margin-top: 10px; color: #aaa;">*Simpan bukti transfer/screenshot untuk diunggah pada kolom di bawah ini.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Bukti Transfer Pembayaran</label>
+                    <input type="file" name="Bukti_Transfer" accept="image/*,.pdf" required>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">KIRIM PENDAFTARAN</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="customAlert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <span class="custom-alert-icon">✅</span>
+            <h3>Berhasil!</h3>
+            <p>Terima kasih! Pendaftaran membership beserta data diri Anda telah berhasil dikirim.</p>
+            <button onclick="closeCustomAlert()" class="custom-alert-btn">TUTUP</button>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2026 Viking Brother Bandung Barat (RSI 1933).</p></footer>
+
+    <script>
+        // Logika Sidebar Menu
+        const menuToggle = document.getElementById('mobile-menu'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('overlay');
+        function toggleMenu() { menuToggle.classList.toggle('active'); sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
+        menuToggle.addEventListener('click', toggleMenu); overlay.addEventListener('click', toggleMenu);
+
+        // Logika AJAX Formspree & Notifikasi
+        const form = document.getElementById('pendaftaranForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const customAlert = document.getElementById('customAlert');
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault(); 
+            
+            // Ubah tombol jadi status loading
+            submitBtn.textContent = "MENGIRIM...";
+            submitBtn.classList.add("loading");
+            submitBtn.disabled = true;
+
+            const data = new FormData(form);
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: data,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showCustomAlert();
+                    form.reset();
+                } else {
+                    alert("Oops! Ada masalah saat mengirim formulir Anda. Pastikan link Formspree sudah benar.");
+                }
+            } catch (error) {
+                alert("Oops! Terjadi kesalahan koneksi. Silakan coba lagi.");
+            } finally {
+                // Kembalikan tombol ke keadaan semula
+                submitBtn.textContent = "KIRIM PENDAFTARAN";
+                submitBtn.classList.remove("loading");
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showCustomAlert() { customAlert.classList.add('show'); }
+        function closeCustomAlert() { customAlert.classList.remove('show'); }
+    </script>
+</body>
+</html>

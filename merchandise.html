@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping - Viking Brother</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --biru-persib: #0a3d8b; --biru-gelap: #051e47; --biru-muda: #1e62c9;
+            --putih: #ffffff; --kuning: #ffeb3b;
+            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.2);
+            --po-color: #ff9800; /* Warna khusus untuk label Pre-Order */
+        }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, var(--biru-persib), var(--biru-gelap)); color: var(--putih); margin: 0; padding-top: 20px; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; flex: 1; position: relative; z-index: 1; }
+
+        /* Sidebar & Menu */
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1002; cursor: pointer; display: flex; flex-direction: column; gap: 6px; background: rgba(10, 61, 139, 0.7); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border); backdrop-filter: blur(5px); transition: all 0.3s ease; }
+        .menu-toggle:hover { background: rgba(10, 61, 139, 0.9); }
+        .menu-toggle .bar { width: 30px; height: 3px; background-color: var(--putih); border-radius: 3px; transition: all 0.4s ease; }
+        .menu-toggle.active .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); background-color: var(--kuning); }
+        .menu-toggle.active .bar:nth-child(2) { opacity: 0; }
+        .menu-toggle.active .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); background-color: var(--kuning); }
+        nav { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: rgba(5, 30, 71, 0.95); backdrop-filter: blur(20px); z-index: 1001; border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; justify-content: flex-start; padding: 40px 20px; box-sizing: border-box; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.5); overflow-y: auto; }
+        nav.active { left: 0; }
+        nav a { color: var(--putih); text-decoration: none; font-size: 1.1em; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; padding: 15px 20px; margin-bottom: 10px; border-radius: 12px; transition: all 0.3s ease; display: block; text-align: center; }
+        nav a:hover, nav a.active { background: var(--kuning); color: var(--biru-persib); box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4); transform: translateX(10px); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        header { text-align: center; padding: 20px; position: relative; z-index: 1; margin-top: 20px; }
+        .logo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--glass-border); background: var(--glass-bg); padding: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); object-fit: cover; }
+        .section-title { text-align: center; margin: 20px 0 40px 0; font-size: 2.2em; text-transform: uppercase; font-weight: 700; color: var(--kuning); text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        /* Merch Card Layout */
+        .merch-container { display: flex; flex-direction: column; gap: 25px; margin-bottom: 50px; }
+        .merch-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: flex; flex-direction: row; align-items: center; position: relative; }
+        .merch-card img { width: 220px; height: 220px; object-fit: cover; border-radius: 15px; }
+        .merch-info { padding: 10px 30px; flex-grow: 1; }
+        .merch-info h3 { margin: 0 0 10px 0; font-size: 1.6em; }
+        .price { font-size: 1.5em; font-weight: 700; color: var(--kuning); margin-bottom: 20px; }
+        
+        /* Badge Status */
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+        .badge-po { background: var(--po-color); color: white; }
+        .badge-ready { background: #25D366; color: white; }
+
+        .buy-btn { background: var(--kuning); color: var(--biru-persib); border: none; padding: 12px 25px; border-radius: 30px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .buy-btn:hover { background: white; transform: translateY(-3px); }
+
+        /* Modal Form */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--biru-gelap); padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--glass-border); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #d1e0ff; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: white; box-sizing: border-box; }
+        .submit-order { width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="menu-toggle" id="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+    <div class="overlay" id="overlay"></div>
+
+    <nav id="sidebar">
+        <div style="text-align: center; margin-bottom: 30px; padding-top: 20px;"><img src="viking-brother/190197.jpg" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--putih); object-fit: cover;"></div>
+        <a href="index.html">Beranda</a><a href="merchandise.html" class="active">Shopping</a><a href="pengurus.html">Jajaran Pengurus</a><a href="keanggotaan.html">Keanggotaan</a><a href="index.html#about">About Us</a>
+    </nav>
+
+    <header><img src="viking-brother/190197.jpg" alt="Logo" class="logo"></header>
+
+    <div class="container">
+        <h2 class="section-title">Official Merchandise</h2>
+        
+        <div class="merch-container">
+            <div class="merch-card">
+                <img src="viking-brother/000001.jpg" alt="Kaos">
+                <div class="merch-info">
+                    <span class="badge badge-ready">Ready Stock</span>
+                    <h3>T-Shirt Biru Viking Brother</h3>
+                    <p class="price">Rp 110.000</p>
+                    <button class="buy-btn" onclick="openModal('T-Shirt Biru Viking Brother', 'Rp 110.000', 'Beli Sekarang')">Beli Sekarang</button>
+                </div>
+            </div>
+
+            <div class="merch-card">
+                <img src="viking-brother/000002.jpg" alt="Kaos">
+                <div class="merch-info">
+                    <span class="badge badge-po">Pre-Order</span>
+                    <h3>T-Shirt Putih Viking Brother</h3>
+                    <p class="price">Rp 110.000</p>
+                    <button class="buy-btn" onclick="openModal('T-Shirt Putih Viking Brother', 'Rp 110.000', 'Pre-Order')">Pre-Order</button>
+                </div>
+            </div>
+
+            <div class="merch-card">
+                <img src="viking-brother/190197.jpg" alt="Sticker">
+                <div class="merch-info">
+                    <span class="badge badge-ready">Ready Stock</span>
+                    <h3>Sticker Eksklusif Viking Brother</h3>
+                    <p class="price">Rp 25.000</p>
+                    <button class="buy-btn" onclick="openModal('Sticker Eksklusif Viking Brother', 'Rp 25.000', 'Beli Sekarang')">Beli Sekarang</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:var(--kuning);" id="modalTitle">Data Pemesanan</h3>
+            <div class="form-group"><label>Nama Lengkap</label><input type="text" id="custName" placeholder="Masukkan nama Anda"></div>
+            <div class="form-group"><label>Alamat Pengiriman</label><input type="text" id="custAddress" placeholder="Masukkan alamat"></div>
+            <div class="form-group"><label>No. WhatsApp</label><input type="text" id="custPhone" placeholder="08xxxxxxxxxx"></div>
+            <button class="submit-order" onclick="sendToWhatsApp()">Kirim Pesanan ke WA</button>
+            <button onclick="document.getElementById('orderModal').style.display='none'" style="background:transparent; border:none; color:white; width:100%; margin-top:10px; cursor:pointer; opacity:0.7;">Batal</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedProduct = "";
+        let selectedPrice = "";
+        let orderType = "";
+
+        function openModal(prod, price, type) {
+            selectedProduct = prod;
+            selectedPrice = price;
+            orderType = type;
+            document.getElementById('modalTitle').innerText = "Data Pemesanan " + type;
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function sendToWhatsApp() {
+            const name = document.getElementById('custName').value;
+            const address = document.getElementById('custAddress').value;
+            const phone = document.getElementById('custPhone').value;
+
+            if(!name || !address || !phone) { alert("Harap isi semua data!"); return; }
+
+            const msg = `Halo Admin, saya ingin membuat pesanan:\n\nStatus: ${orderType}\nProduk: ${selectedProduct}\nHarga: ${selectedPrice}\n\nNama: ${name}\nAlamat: ${address}\nNo. HP: ${phone}`;
+            const url = `https://wa.me/6281234567890?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        // Sidebar logic
+        const menuToggle = document.getElementById('mobile-menu'); const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('overlay');
+        function toggleMenu() { menuToggle.classList.toggle('active'); sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
+        menuToggle.addEventListener('click', toggleMenu); overlay.addEventListener('click', toggleMenu);
+    </script>
+</body>
+</html>
